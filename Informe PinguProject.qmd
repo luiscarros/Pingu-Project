@@ -1,0 +1,145 @@
+---
+title: "Informe Pingu Project"
+format: 
+   html: default
+   gfm: default
+editor: visual
+---
+
+## Pingu Project
+
+El presente proyecto es un trabajo del curso R, Quarto y GitHub de la Escuela de doctorado de la Universidad de Alcalá (UAH).
+
+## Datos
+
+Los datos contienen medidas sobre tres especies diferentes de pingüinos (Adeline, Chinstrap y Gentoo) obervadas en tres islas de la Antartida (Biscoe, Dream y Torgersen).
+
+![](Imagen1.png)
+
+Los datos fueron obtenidos del paquete "palmerpenguins". Para ello, primero instalamos el paquete y cargamos este paquete y "tidyverse":
+
+```{r}
+#install.packages ("palmerpenguins")
+library(palmerpenguins)
+library(tidyverse)
+```
+
+Se denominó el dataset como "dt" para poder llamarlo más adelante
+
+```{r}
+dt <- data.frame(penguins)
+```
+
+Realizamos una primera aproximación con los datos para ver sus características y su distribución:
+
+```{r}
+head(dt)
+```
+
+```{r}
+glimpse(dt)
+```
+
+```{r}
+summary(dt)
+```
+
+#Descriptivos
+
+Observamos la distribución de los datos calculando el número de individuos totales, maculinos y femeninos por especie:
+
+```{r}
+table(dt$species)
+```
+
+```{r}
+table(dt$species, dt$sex)
+```
+
+También vimos la media, desviación estándar, valor mínimo y máximo de la longitud y profundidad del pico, la longitud de la aleta y el tamaño:
+
+```{r}
+##Longitud pico
+#result_lenght <- dt %>% summarise(mean(bill_length_mm, na.rm = T), sd(bill_length_mm, na.rm = T), max(bill_length_mm, na.rm = T), min(bill_length_mm, na.rm = T))
+#result_lenght
+
+##Profundidad pico
+#result_depht <- dt %>% summarise(mean(bill_depth_mm, na.rm = T), sd(bill_depth_mm, na.rm = T), max(bill_depth_mm, na.rm = T), min(bill_depth_mm, na.rm = T))
+#result_depht
+
+##Longitud de la aleta
+#result_flipper <- dt %>% summarise(mean(flipper_length_mm, na.rm = T), sd(flipper_length_mm, na.rm = T), max(flipper_length_mm, na.rm = T), min(flipper_length_mm, na.rm = T))
+#result_flipper
+
+##Tamaño
+#result_bodymass <- dt %>% summarise(mean(body_mass_g, na.rm = T), sd(body_mass_g, na.rm = T), max(body_mass_g, na.rm = T), min(body_mass_g, na.rm = T))
+#result_bodymass
+
+```
+
+| Variable         |  mean   |   sd   | min  | max  |
+|------------------|:-------:|:------:|:----:|:----:|
+| Longitud pico    |  43.92  |  5.46  | 32.1 | 59.6 |
+| Profundidad pico |  17.15  |  1.97  | 13.1 | 21.5 |
+| Longitud aleta   | 200.92  | 14.06  | 172  | 231  |
+| Tamaño           | 4201.75 | 801.95 | 2700 | 6300 |
+
+Para tener mayor información se vieron las anteriores medidas según sexo de los pingüinos:
+
+```{r}
+#Longitud pico
+result_lenght_sex <- dt %>% filter(!is.na(sex)) %>%  group_by(sex ) %>%  summarise(mean(bill_length_mm, na.rm = T), sd(bill_length_mm, na.rm = T), max(bill_length_mm, na.rm = T), min(bill_length_mm, na.rm = T))
+result_lenght_sex
+
+#Profundidad pico
+result_depht_sex <- dt %>%  filter(!is.na(sex)) %>%  group_by(sex ) %>% summarise(mean(bill_depth_mm, na.rm = T), sd(bill_depth_mm, na.rm = T), max(bill_depth_mm, na.rm = T), min(bill_depth_mm, na.rm = T))
+result_depht_sex
+
+#Longitud aleta
+result_flipper_sex <- dt %>%  filter(!is.na(sex)) %>%  group_by(sex ) %>% summarise(mean(flipper_length_mm, na.rm = T), sd(flipper_length_mm, na.rm = T), max(flipper_length_mm, na.rm = T), min(flipper_length_mm, na.rm = T))
+
+result_flipper_sex
+
+#Tamaño
+result_bodymass_sex <- dt %>% filter(!is.na(sex)) %>%  group_by(sex ) %>%  summarise(mean(body_mass_g, na.rm = T), sd(body_mass_g, na.rm = T), max(body_mass_g, na.rm = T), min(body_mass_g, na.rm = T))
+
+result_bodymass_sex
+```
+
+Realizamos una representación gráfica del número de indivduos muestreados de cada especie en cada isla:
+
+```{r}
+ggplot(data = dt, aes( x = as.character(island), fill = species)) +
+  geom_bar() + scale_fill_manual(values =  c("orange", "purple", "blue")) +
+  labs(x ="Islands", y = "Number of individuals") +
+  theme_classic()
+
+```
+
+La gráfica de barras nos permite saber que la especie "Adelie" se ha muestreado en las tres islas. Para conocer el número de individuos muestreados en la isla de Dream, la gráfica nos indica que se encuentra entre los 100 y 150 individuos, para ser más exactos realizamos una tabla del número total de individuos en cada isla:
+
+```{r}
+table(dt$island)
+```
+
+Posteriormente, creamos una gráfica para conocer el tamaño de cada especie según el sexo:
+
+```{r}
+ggplot(data= subset(dt, !is.na(sex))) + geom_boxplot(aes(x =sex, y = body_mass_g)) + facet_wrap(~species) + labs(x ="Sex", y = "Body mass (gr)") + theme_classic()
+```
+
+En esta gráfica podemos visualizar que la especie "Genteoo" tiene mayor tamaño que las otras dos especies. Sin embargo, en la especie "Chinstrap" el tamaño de las hembras y machos son similares.
+
+#Suplemento
+
+Como complemento de la actividad decicimos analizar si había algún tipo de relación entre el tamaño de la aleta y el tamaño del pingüino. Para ello creamos la siguiente gráfica:
+
+```{r}
+ggplot(dt, aes(x= flipper_length_mm, y = body_mass_g))+ geom_jitter() + labs(x ="Longitud aleta", y = "Tamaño pingüino (gr)") + geom_smooth(method =  lm) + theme_classic()
+```
+
+#Bibliografía
+
+```{r}
+knitr::write_bib(c("tidyverse", "palmerpenguins"), file = "bibliografia.bib")
+```
